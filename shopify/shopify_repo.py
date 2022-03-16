@@ -45,11 +45,7 @@ def get(resource: shopify.Resource, auth: shopify.Shop):
                 res = r.json()
             data = res[resource.data_key]
             next_link = r.links.get("next")
-            return (
-                data + __get(client, next_link.get("url"))
-                if next_link
-                else data
-            )
+            return data + __get(client, next_link.get("url")) if next_link else data
 
         with get_session(auth.access_token) as client:
             return __get(

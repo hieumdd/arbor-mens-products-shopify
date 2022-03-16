@@ -43,10 +43,13 @@ class TestShopify:
         )
         res
 
+
 class TestTasks:
     def test_service(self, timeframe):
-        res = tasks_service.tasks_service({
-            "start": timeframe[0],
-            "end": timeframe[1],
-        })
+        res = tasks_service.tasks_service(
+            {
+                "start": timeframe[0],
+                "end": timeframe[1],
+            }
+        )
         res
