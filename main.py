@@ -1,23 +1,15 @@
-from models.shopify import Orders
-from controller.handler import run
-from controller.tasks import create_tasks
+from shopify.shopify_controller import shopify_controller
+from tasks.tasks_service import tasks_service
 
 
 def main(request):
     data = request.get_json()
     print(data)
 
-    if data:
-        if "tasks" in data:
-            response = create_tasks(data)
-        else:
-            err_response, response = run(
-                Orders,
-                data["auth"],
-                data.get("start"),
-                data.get("end"),
-            )
-            if err_response:
-                raise err_response
+    if "shop" in data:
+        response = shopify_controller(data)
+    else:
+        response = tasks_service(data)
+
     print(response)
     return response

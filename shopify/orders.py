@@ -1,116 +1,95 @@
-import json
+from shopify.shopify import Pipeline, Resource
 
-from shopify import shopify
-
-orders = shopify.ShopifyResource(
+orders = Pipeline(
     "Orders",
-    "orders.json",
-    "orders",
-    [
-        "app_id",
-        "closed_at",
-        "created_at",
-        "currency",
-        "customer",
-        "email",
-        "id",
-        "line_items",
-        "order_number",
-        "processed_at",
-        "refunds",
-        "source_name",
-        "subtotal_price",
-        "total_tax",
-        "total_shipping_price_set",
-        "total_discounts",
-        "total_price",
-        "updated_at",
-    ],
+    Resource(
+        "orders.json",
+        "orders",
+        [
+            "id",
+            "closed_at",
+            "created_at",
+            "updated_at",
+            "currency",
+            "name",
+            "order_number",
+            "email",
+            "customer",
+            "referring_site",
+            "fulfillment_status",
+            "current_total_discounts",
+            "current_total_price",
+            "current_subtotal_price",
+            "current_total_tax",
+            "subtotal_price",
+            "total_discounts",
+            "total_price",
+            "total_tax",
+        ],
+    ),
     lambda rows: [
         {
             "id": row.get("id"),
-            "app_id": row.get("app_id"),
             "closed_at": row.get("closed_at"),
             "created_at": row.get("created_at"),
-            "currency": row.get("currency"),
-            "email": row.get("email"),
+            "updated_at": row.get("updated_at"),
+            "name": row.get("name"),
             "order_number": row.get("order_number"),
-            "processed_at": row.get("processed_at"),
-            "source_name": row.get("source_name"),
-            "subtotal_price": row.get("subtotal_price"),
-            "total_tax": row.get("total_tax"),
-            "total_shipping_price_set": {
-                "shop_money": {
-                    "amount": row["total_shipping_price_set"]["shop_money"].get(
-                        "amount"
-                    ),
-                    "currency_code": row["total_shipping_price_set"]["shop_money"].get(
-                        "currency_code"
-                    ),
-                }
-                if row["total_shipping_price_set"].get("shop_money")
-                else {},
-                "presentment_money": {
-                    "amount": row["total_shipping_price_set"]["presentment_money"].get(
-                        "amount"
-                    ),
-                    "currency_code": row["total_shipping_price_set"][
-                        "presentment_money"
-                    ].get("currency_code"),
-                }
-                if row["total_shipping_price_set"].get("presentment_money")
-                else {},
+            "email": row.get("email"),
+            "currency": row.get("currency"),
+            "customer": {
+                "id": row["customer"].get("id"),
+                "email": row["customer"].get("email"),
+                "first_name": row["customer"].get("first_name"),
+                "last_name": row["customer"].get("last_name"),
+                "phone": row["customer"].get("phone"),
             }
-            if row.get("total_shipping_price_set")
+            if row.get("customer")
             else {},
+            "referring_site": row.get(
+                "referring_site",
+            ),
+            "fulfillment_status": row.get("fulfillment_status"),
+            "current_total_discounts": row.get("current_total_discounts"),
+            "current_total_price": row.get("current_total_price"),
+            "current_subtotal_price": row.get("current_subtotal_price"),
+            "current_total_tax": row.get("current_total_tax"),
+            "subtotal_price": row.get("subtotal_price"),
             "total_discounts": row.get("total_discounts"),
             "total_price": row.get("total_price"),
-            "updated_at": row.get("updated_at"),
-            "customer": json.dumps(row.get("customer")),
-            "line_items": json.dumps(row.get("line_items")),
-            "refunds": json.dumps(row.get("refunds")),
+            "total_tax": row.get("total_tax"),
         }
         for row in rows
     ],
     [
-        {"name": "id", "type": "INTEGER"},
-        {"name": "app_id", "type": "INTEGER"},
+        {"name": "id", "type": "NUMERIC"},
         {"name": "closed_at", "type": "TIMESTAMP"},
         {"name": "created_at", "type": "TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP"},
         {"name": "currency", "type": "STRING"},
+        {"name": "name", "type": "STRING"},
+        {"name": "order_number", "type": "NUMERIC"},
         {"name": "email", "type": "STRING"},
-        {"name": "order_number", "type": "INTEGER"},
-        {"name": "processed_at", "type": "TIMESTAMP"},
-        {"name": "source_name", "type": "STRING"},
-        {"name": "subtotal_price", "type": "FLOAT"},
-        {"name": "total_tax", "type": "FLOAT"},
         {
-            "name": "total_shipping_price_set",
-            "type": "record",
+            "name": "customer",
+            "type": "RECORD",
             "fields": [
-                {
-                    "name": "shop_money",
-                    "type": "record",
-                    "fields": [
-                        {"name": "amount", "type": "FLOAT"},
-                        {"name": "currency_code", "type": "STRING"},
-                    ],
-                },
-                {
-                    "name": "presentment_money",
-                    "type": "record",
-                    "fields": [
-                        {"name": "amount", "type": "FLOAT"},
-                        {"name": "currency_code", "type": "STRING"},
-                    ],
-                },
+                {"name": "id", "type": "NUMERIC"},
+                {"name": "email", "type": "STRING"},
+                {"name": "first_name", "type": "STRING"},
+                {"name": "last_name", "type": "STRING"},
+                {"name": "phone", "type": "STRING"},
             ],
         },
-        {"name": "total_discounts", "type": "FLOAT"},
-        {"name": "total_price", "type": "FLOAT"},
-        {"name": "updated_at", "type": "TIMESTAMP"},
-        {"name": "customer", "type": "STRING"},
-        {"name": "line_items", "type": "STRING"},
-        {"name": "refunds", "type": "STRING"},
+        {"name": "referring_site", "type": "STRING"},
+        {"name": "fulfillment_status", "type": "STRING"},
+        {"name": "current_total_discounts", "type": "NUMERIC"},
+        {"name": "current_total_price", "type": "NUMERIC"},
+        {"name": "current_subtotal_price", "type": "NUMERIC"},
+        {"name": "current_total_tax", "type": "NUMERIC"},
+        {"name": "subtotal_price", "type": "NUMERIC"},
+        {"name": "total_discounts", "type": "NUMERIC"},
+        {"name": "total_price", "type": "NUMERIC"},
+        {"name": "total_tax", "type": "NUMERIC"},
     ],
 )

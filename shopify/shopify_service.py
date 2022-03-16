@@ -1,4 +1,5 @@
 from typing import Optional, Union
+import os
 
 from compose import compose
 
@@ -15,27 +16,37 @@ pipelines = {
 shops = {
     i.shop_url: i
     for i in [
-        shopify.Auth("arbor-mens-products", ""),
+        shopify.Shop(
+            "ArborMensProducts",
+            "arbor-mens-products",
+            os.getenv("ARBOR_MENS_PRODUCTS_TOKEN", ""),
+        ),
     ]
 }
 
 
 def pipeline_service(
     pipeline: shopify.Pipeline,
-    auth: shopify.Auth,
+    shop: shopify.Shop,
     start: Optional[str],
     end: Optional[str],
 ) -> dict[str, Union[str, int]]:
     return compose(
         lambda x: {
             "table": pipeline.table,
-            "shop_url": auth.shop_url,
+            "shop_url": shop.shop_url,
             "start": start,
             "end": end,
             "output_rows": x,
         },
-        load(pipeline.table, pipeline.schema, pipeline.id_key, pipeline.cursor_key),
+        load(
+            shop.name,
+            pipeline.table,
+            pipeline.schema,
+            pipeline.id_key,
+            pipeline.cursor_key,
+        ),
         pipeline.transform,
-        shopify_repo.get(pipeline.resource, auth),
-        get_last_timestamp(pipeline.table, pipeline.cursor_key),
+        shopify_repo.get(pipeline.resource, shop),
+        get_last_timestamp(shop.name, pipeline.table, pipeline.cursor_key),
     )((start, end))
