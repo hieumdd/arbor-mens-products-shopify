@@ -8,7 +8,7 @@ BQ_CLIENT = bigquery.Client()
 DATASET = "Shopify"
 
 
-def get_last_timestamp(table: str, cursor_key: str):
+def get_last_timestamp(name: str, table: str, cursor_key: str):
     def _get(
         timeframe: tuple[Optional[str], Optional[str]]
     ) -> tuple[datetime, datetime]:
@@ -17,7 +17,7 @@ def get_last_timestamp(table: str, cursor_key: str):
             return tuple([datetime.strptime(i, "%Y-%m-%d") for i in (start, end)])  # type: ignore
         else:
             rows = BQ_CLIENT.query(
-                f"SELECT MAX({cursor_key}) AS incre FROM {DATASET}.{table}"
+                f"SELECT MAX({cursor_key}) AS incre FROM {name}_{DATASET}.{table}"
             ).result()
             return (
                 [row for row in rows][0]["incre"],

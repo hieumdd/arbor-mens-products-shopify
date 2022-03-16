@@ -48,5 +48,5 @@ def pipeline_service(
         ),
         pipeline.transform,
         shopify_repo.get(pipeline.resource, auth),
-        get_last_timestamp(pipeline.table, pipeline.cursor_key),
+        get_last_timestamp(auth.name, pipeline.table, pipeline.cursor_key),
     )((start, end))

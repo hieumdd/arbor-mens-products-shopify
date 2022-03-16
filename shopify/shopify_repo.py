@@ -27,7 +27,6 @@ def build_params(
     start, end = [i.strftime(TIMESTAMP_FORMAT) for i in timeframe]
     return {
         "limit": 250,
-        # "limit": 10,
         "status": "any",
         "fields": ",".join(fields),
         "updated_at_min": start,
