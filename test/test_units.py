@@ -1,6 +1,7 @@
 import pytest
 
 from shopify import shopify_service
+from tasks import tasks_service
 
 TIMEFRAME = [
     ("auto", (None, None)),
@@ -42,13 +43,10 @@ class TestShopify:
         )
         res
 
-
-# def test_tasks(start, end):
-#     res = run(
-#         {
-#             "tasks": "orders",
-#             "start": start,
-#             "end": end,
-#         }
-#     )
-#     assert res["messages_sent"] > 0
+class TestTasks:
+    def test_service(self, timeframe):
+        res = tasks_service.tasks_service({
+            "start": timeframe[0],
+            "end": timeframe[1],
+        })
+        res
