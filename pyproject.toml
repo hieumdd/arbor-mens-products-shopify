@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "sugatan_shopify"
-version = "0.1.0"
+name = "arbor-mens-products-shopify"
+version = "1.0.0"
 description = ""
 authors = ["HM <hieumdd@gmail.com>"]
 
@@ -14,7 +14,6 @@ compose = "^1.2.8"
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"
 pytest = "^6.2.5"
-pytest-timeout = "^2.0.1"
 mypy = "^0.910"
 types-requests = "^2.26.0"
 
