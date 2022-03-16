@@ -34,7 +34,7 @@ def build_params(
     }
 
 
-def get(resource: shopify.Resource, auth: shopify.Shop):
+def get(resource: shopify.Resource, shop: shopify.Shop):
     def _get(timeframe: tuple[datetime, datetime]):
         def __get(
             client: requests.Session,
@@ -47,10 +47,10 @@ def get(resource: shopify.Resource, auth: shopify.Shop):
             next_link = r.links.get("next")
             return data + __get(client, next_link.get("url")) if next_link else data
 
-        with get_session(auth.access_token) as client:
+        with get_session(shop.access_token) as client:
             return __get(
                 client,
-                get_url(resource.endpoint, auth.shop_url),
+                get_url(resource.endpoint, shop.shop_url),
                 build_params(resource.fields, timeframe),
             )
 
