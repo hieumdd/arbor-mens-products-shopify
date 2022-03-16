@@ -5,7 +5,7 @@ from google.cloud import bigquery
 
 BQ_CLIENT = bigquery.Client()
 
-DATASET = "TMS"
+DATASET = "Shopify"
 
 
 def get_last_timestamp(table: str, cursor_key: str):
@@ -28,6 +28,7 @@ def get_last_timestamp(table: str, cursor_key: str):
 
 
 def load(
+    name: str,
     table: str,
     schema: list[dict[str, Any]],
     id_key: str,
@@ -40,7 +41,7 @@ def load(
         output_rows = (
             BQ_CLIENT.load_table_from_json(
                 data,
-                f"{DATASET}.{table}",
+                f"{name}_{DATASET}.{table}",
                 job_config=bigquery.LoadJobConfig(
                     create_disposition="CREATE_IF_NEEDED",
                     write_disposition="WRITE_APPEND" if id_key else "WRITE_TRUNCATE",
@@ -51,22 +52,25 @@ def load(
             .output_rows
         )
         if id_key and cursor_key:
-            _update(table, id_key, cursor_key)
+            _update(name, table, id_key, cursor_key)
         return output_rows
 
     return _load
 
 
-def _update(table: str, id_key: str, cursor_key: str):
+def _update(name: str, table: str, id_key: str, cursor_key: str):
     BQ_CLIENT.query(
         f"""
-    CREATE OR REPLACE TABLE {DATASET}.{table} AS
+    CREATE OR REPLACE TABLE {name}_{DATASET}.{table} AS
     SELECT * EXCEPT(row_num)
     FROM (
         SELECT
             *,
-            ROW_NUMBER() OVER (PARTITION BY {id_key} ORDER BY {cursor_key} DESC) AS row_num,
-        FROM {DATASET}.{table}
+            ROW_NUMBER() OVER (
+                PARTITION BY {id_key}
+                ORDER BY {cursor_key} DESC
+            ) AS row_num,
+        FROM {name}_{DATASET}.{table}
     ) WHERE row_num = 1
     """
     ).result()
