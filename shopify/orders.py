@@ -1,31 +1,33 @@
 import json
 
-from shopify import shopify
+from shopify.shopify import Pipeline, Resource
 
-orders = shopify.ShopifyResource(
+orders = Pipeline(
     "Orders",
-    "orders.json",
-    "orders",
-    [
-        "app_id",
-        "closed_at",
-        "created_at",
-        "currency",
-        "customer",
-        "email",
-        "id",
-        "line_items",
-        "order_number",
-        "processed_at",
-        "refunds",
-        "source_name",
-        "subtotal_price",
-        "total_tax",
-        "total_shipping_price_set",
-        "total_discounts",
-        "total_price",
-        "updated_at",
-    ],
+    Resource(
+        "orders.json",
+        "orders",
+        [
+            "app_id",
+            "closed_at",
+            "created_at",
+            "currency",
+            "customer",
+            "email",
+            "id",
+            "line_items",
+            "order_number",
+            "processed_at",
+            "refunds",
+            "source_name",
+            "subtotal_price",
+            "total_tax",
+            "total_shipping_price_set",
+            "total_discounts",
+            "total_price",
+            "updated_at",
+        ],
+    ),
     lambda rows: [
         {
             "id": row.get("id"),

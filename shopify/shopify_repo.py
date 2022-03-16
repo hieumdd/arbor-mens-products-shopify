@@ -16,7 +16,7 @@ def get_url(endpoint: str, shop_url: str) -> str:
 
 def get_session(access_token: str) -> requests.Session:
     client = requests.Session()
-    client.headers.update({"access_token": access_token})
+    client.headers.update({"X-Shopify-Access-Token": access_token})
     return client
 
 
@@ -27,6 +27,7 @@ def build_params(
     start, end = [i.strftime(TIMESTAMP_FORMAT) for i in timeframe]
     return {
         "limit": 250,
+        # "limit": 10,
         "status": "any",
         "fields": ",".join(fields),
         "updated_at_min": start,
@@ -34,19 +35,19 @@ def build_params(
     }
 
 
-def get(resource: shopify.Resource, auth: shopify.Auth):
+def get(resource: shopify.Resource, auth: shopify.Shop):
     def _get(timeframe: tuple[datetime, datetime]):
         def __get(
             client: requests.Session,
-            params: dict[str, Union[str, int]],
             url: str,
+            params: dict[str, Union[str, int]] = {},
         ) -> list[dict[str, Any]]:
-            with client.get(url, params) as r:
+            with client.get(url, params=params) as r:
                 res = r.json()
             data = res[resource.data_key]
             next_link = r.links.get("next")
             return (
-                data + __get(client, params, next_link.get("url"))
+                data + __get(client, next_link.get("url"))
                 if next_link
                 else data
             )
@@ -54,8 +55,8 @@ def get(resource: shopify.Resource, auth: shopify.Auth):
         with get_session(auth.access_token) as client:
             return __get(
                 client,
+                get_url(resource.endpoint, auth.shop_url),
                 build_params(resource.fields, timeframe),
-                get_url(resource.endpoint, auth.access_token),
             )
 
     return _get
